@@ -38,25 +38,22 @@ function calculateFlightProfitLoss(flightData, airports, aeroplanes) {
     
     const distance = (UKAirport === 'MAN' ? parseInt(airport[2]) : parseInt(airport[3]));
 
-    console.log(aeroplane[3])
-    console.log(economySeatsBooked)
-
     if (distance > aeroplane[2]){
-        console.log("Specified aircraft can not fly the distance of this flight")
+        console.log(`Specified aircraft can not fly the distance of the flight from ${UKAirport} to ${overseasAirport}`)
         return null
     }
 
     if (parseInt(economySeatsBooked) > parseInt(aeroplane[3]) || parseInt(businessSeatsBooked) > parseInt(aeroplane[4]) || parseInt(firstClassSeatsBooked) > parseInt(aeroplane[5])) {
         console.log(`Too many seats are booked on the flight from ${UKAirport} to ${overseasAirport}`)
+        return null
     }
-
 
     const runningCostPerSeatPer100km = parseFloat(aeroplane[1].substring(1)); 
     const runningCost = (distance / 100) * runningCostPerSeatPer100km * (parseInt(economySeatsBooked) + parseInt(businessSeatsBooked) + parseInt(firstClassSeatsBooked));
     const totalRevenue = (parseInt(economySeatsBooked) * parseFloat(economyPrice)) + (parseInt(businessSeatsBooked) * parseFloat(businessPrice)) + (parseInt(firstClassSeatsBooked) * parseFloat(firstClassPrice));
     const profitLoss = totalRevenue - runningCost;
   
-    return { profitLoss, totalRevenue, runningCost };
+    return profitLoss
 
 }
 
@@ -73,23 +70,12 @@ function processFlightData() {
     }
     
     let data = ''
+
     flightsData.forEach(flightData => {
         const results = calculateFlightProfitLoss(flightData, airportsData, aeroplanesData);
         if (results) {
-            const { profitLoss, totalRevenue, runningCost } = results;
-            data += `
-            Flight Details:
-            From: ${flightData[0]}
-            To: ${flightData[1]}
-            Aircraft Type: ${flightData[2]}
-            Economy Seats: ${flightData[3]}
-            Business Seats: ${flightData[4]}
-            First Class Seats: ${flightData[5]}
-            Financial Details:
-            Total Revenue: £${totalRevenue.toFixed(2)}
-            Running Cost: £${runningCost.toFixed(2)}
-            ${profitLoss >= 0 ? 'Profit' : 'Loss'}: £${Math.abs(profitLoss).toFixed(2)}
-            `;
+            const profitLoss = results;
+            data += `The flight from ${flightData[0]} to ${flightData[1]} using a ${flightData[2]}, with the given seat bookings and prices, would result in a ${profitLoss >= 0 ? 'profit' : 'loss'} of £${Math.abs(profitLoss).toFixed(2)}\n`
         }
   });
 
